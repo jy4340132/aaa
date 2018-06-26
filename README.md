@@ -1,4 +1,4 @@
-# aaa
+aaa
 =====
 
 javascript 音频库，支持G726/G711/ADPCM编解码、播放
