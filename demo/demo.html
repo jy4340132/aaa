@@ -1,0 +1,143 @@
+<html>
+<meta charset="UTF-8">
+<head>
+</head>
+<body>
+
+<h1>DEMO</h1>
+
+<button type="button" id="start">开始</button>
+
+</body>
+
+<script type="text/javascript" src="../src/std.js"></script>
+<script type="text/javascript" src="../src/pcm_player.js"></script>
+<script type="text/javascript" src="../src/g726.js"></script>
+<script type="text/javascript" src="../src/g711.js"></script>
+<script type="text/javascript" src="../src/adpcm.js"></script>
+
+<script>
+
+const memory = new WebAssembly.Memory({initial: 256, maximum: 256});
+
+const importObj = {
+    env: {
+        abortStackOverflow: () => { throw new Error('overflow'); },
+        table: new WebAssembly.Table({ initial: 0, maximum: 0, element: 'anyfunc' }),
+        tableBase: 0,
+        memory: memory,
+        memoryBase: 102400,
+        STACKTOP: 0,
+        STACK_MAX: memory.buffer.byteLength,
+    }
+};
+
+let audioWasm = null;
+let g726Coder = null;
+
+// fetch("../src/audio.wasm").then((response) => response.arrayBuffer())
+// .then((bytes) => WebAssembly.instantiate(bytes, importObj))
+// .then((wasm) => {
+//     audioWasm = wasm;
+//     console.log(wasm);
+// });
+
+// function startRecord(ws)
+// {
+//     let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+//     let mediaDevices = navigator.mediaDevices.getUserMedia({audio: true});
+//     let g726TempBuffer = null;
+//     mediaDevices.then(stream => {
+//         let source = audioCtx.createMediaStreamSource(stream);
+//         let recorder = audioCtx.createScriptProcessor(4096, 1, 1);
+//         source.connect(recorder);
+//         recorder.connect(audioCtx.destination);
+//         recorder.onaudioprocess = function(audioEvent) {
+//             let inputBuffer = audioEvent.inputBuffer.getChannelData(0);
+//             // audioEvent.outputBuffer.copyToChannel(new Float32Array(inputBuffer.buffer), 0, 0);
+//             let pcmFloat32Data = Std.downsampleBuffer(new Float32Array(inputBuffer.buffer), 8000, audioCtx.sampleRate);
+//             let pcm16BitData = Std.floatToShortData(pcmFloat32Data);
+//             let g726OffsetBuffer = g726TempBuffer;
+//             g726TempBuffer = g726TempBuffer == null ? new Int16Array(pcm16BitData.length) : new Int16Array(pcm16BitData.length + g726OffsetBuffer.length);
+//             if(g726OffsetBuffer != null)
+//             {
+//                 g726TempBuffer.set(g726OffsetBuffer);
+//                 g726TempBuffer.set(pcm16BitData, g726OffsetBuffer.length);
+//             }
+//             else
+//             {
+//                 g726TempBuffer.set(pcm16BitData);
+//             }
+//             let i = 0;
+//             let step = 320;
+//             for(; i < g726TempBuffer.length; i += step)
+//             {
+//                 let pcmPacketData = g726TempBuffer.slice(i, i + step);
+//                 if(pcmPacketData.length == step)
+//                 {
+//                     let g726Data = g726Coder.encode(pcmPacketData);
+//                     Std.changeByteEndian(g726Data);
+//                     let rtpData = rtp.makeAudio(g726Data);
+//                     if(rtpData.errorCode == Result.ErrorCode.SUCCESS)
+//                     {
+//                         ws.send(rtpData.data);
+//                     }
+//                 }
+//             }
+//             if(g726TempBuffer.length - i != 0)
+//             {
+//                 i -= step;
+//                 g726OffsetBuffer = g726TempBuffer;
+//                 g726TempBuffer = new Int16Array(g726OffsetBuffer.length - i);
+//                 g726TempBuffer.set(g726OffsetBuffer.slice(i, g726OffsetBuffer.length));
+//             }
+//             else
+//             {
+//                 g726TempBuffer = null;
+//             }
+//         }
+//     });
+// }
+
+// $("#start").click(function() {
+//     var ws = new WebSocket("ws://192.168.24.119:10821/RealStream/013887654321/33");
+//     ws.binaryType = 'arraybuffer';
+//     ws.onopen = function(event)
+//     {
+//         console.log("ws.onopen");
+//     }
+
+//     let pcmPlayer = new PCMPlayer(1, 8000);
+
+//     ws.onmessage = function(event)
+//     {
+//         let rtpFrame = rtp.parse(event.data);
+//         if(rtpFrame.errorCode == Result.ErrorCode.SUCCESS && rtpFrame.type == Result.Type.AUDIO)
+//         {
+//             if(g726Coder == null && audioWasm != null)
+//             {
+//                 g726Coder = new G726(audioWasm, memory, 4);
+//                 startRecord(ws);
+//             }
+//             if(g726Coder != null)
+//             {
+//                 Std.changeByteEndian(rtpFrame.data);
+//                 let pcm16BitData = g726Coder.decode(rtpFrame.data);
+//                 let pcmFloat32Data = Std.shortToFloatData(pcm16BitData);
+//                 pcmPlayer.feed(pcmFloat32Data);
+//             }
+//         }
+//         else
+//         {
+//         }
+//     }
+
+//     ws.onclose = function(event)
+//     {
+//         console.log("ws.onclose");
+//     }
+// });
+
+</script>
+
+</html>
