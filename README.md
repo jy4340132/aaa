@@ -9,16 +9,18 @@ javascript 音频库，支持G726/G711/ADPCM编解码、播放。
 
 &nbsp;
 
-[Demo地址](https://jy4340132.github.io/aaa/demo/demo.html)
+用法详见[https://jy4340132.github.io/aaa/demo/demo.html](https://jy4340132.github.io/aaa/demo/demo.html)
 
 &nbsp;
 
 未来计划：
+=====
 
 加入h264视频播放，AAC音频播放。
 
 &nbsp;
 
 作者邮箱：
+=====
 
 1026397500@qq.com
