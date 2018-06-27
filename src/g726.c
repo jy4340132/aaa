@@ -574,42 +574,58 @@ void initG726State(int index, int bitCount)
 	g726_init(g726_state + index, 8000 * bitCount);
 }
 
-void decodeG726(int index, unsigned char* inData, int len, short* outData, int* outLen)
+void decodeG726(int index, unsigned char* inData, int len, short* outData, int type)
 {
+	if(type == 1)
+	{
+        for(int i = 0; i != len; ++i)
+        {
+            inData[i] = ((inData[i] & 0x0F) << 4) + ((inData[i] >> 4) & 0x0F);
+        }
+	}
 	int bitCount = (g726_state + index) -> bits_per_sample;
 	switch(bitCount)
 	{
 		case 2:
-		*outLen = g726_decode16(g726_state + index, outData, inData, len);
+		g726_decode16(g726_state + index, outData, inData, len);
 		break;	
 		case 3:
-		*outLen = g726_decode24(g726_state + index, outData, inData, len);
+		g726_decode24(g726_state + index, outData, inData, len);
 		break;	
 		case 4:
-		*outLen = g726_decode32(g726_state + index, outData, inData, len);
+		g726_decode32(g726_state + index, outData, inData, len);
 		break;	
 		case 5:
-		*outLen = g726_decode40(g726_state + index, outData, inData, len);
+		g726_decode40(g726_state + index, outData, inData, len);
 		break;	
 	}
 }
 
-void encodeG726(int index, short* inData, int len, unsigned char* outData, int* outLen)
+void encodeG726(int index, short* inData, int len, unsigned char* outData, int type)
 {
 	int bitCount = (g726_state + index) -> bits_per_sample;
+	int outLen = 0;
 	switch(bitCount)
 	{
 		case 2:
-		*outLen = g726_encode16(g726_state + index, outData, inData, len);
+		outLen = g726_encode16(g726_state + index, outData, inData, len);
 		break;
 		case 3:
-		*outLen = g726_encode24(g726_state + index, outData, inData, len);
+		outLen = g726_encode24(g726_state + index, outData, inData, len);
 		break;
 		case 4:
-		*outLen = g726_encode32(g726_state + index, outData, inData, len);
+		outLen = g726_encode32(g726_state + index, outData, inData, len);
 		break;
 		case 5:
-		*outLen = g726_encode40(g726_state + index, outData, inData, len);
+		outLen = g726_encode40(g726_state + index, outData, inData, len);
 		break;
+	}
+	if(type == 1)
+	{
+		char* buffer = (char*)outData;
+        for(int i = 0; i != (outLen << 1); ++i)
+        {
+            buffer[i] = ((buffer[i] & 0x0F) << 4) + ((buffer[i] >> 4) & 0x0F);
+        }
 	}
 }

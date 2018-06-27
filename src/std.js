@@ -101,15 +101,6 @@ class Std
         }
         return result;
     }
-
-    static changeByteEndian(data)
-    {
-        let buffer = new Uint8Array(data.buffer, data.byteOffset, data.byteLength);
-        for(let i = 0; i != buffer.byteLength; ++i)
-        {
-            buffer[i] = ((buffer[i] & 0x0F) << 4) + ((buffer[i] >>> 4) & 0x0F);
-        }
-    }
 }
 
 class Result
@@ -160,11 +151,21 @@ class AudioCoder
 {
     constructor(wasm, importObj)
     {
-        this.importObj = importObj;
+        if(importObj.memoryBase < 102400)
+        {
+            throw new Error("too small");
+        }
+        this._importObj = importObj;
+        this._wasm = wasm;
+        this._memory = new Uint8Array(this._importObj.env.memory.buffer);
     }
 
     _copyToMemory(data)
     {
-        return new Result(null, -1, -1, errorCode);
-    }     
+        if(data.byteLength > (this._importObj.env.memoryBase >>> 6))
+        {
+            throw new Error("overflow");
+        }
+        this._memory.set(new Uint8Array(data.buffer, data.byteOffset, data.byteLength));
+    }
 }

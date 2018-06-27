@@ -1,39 +1,36 @@
 
-class G711
+class G711 extends AudioCoder
 {
-    constructor(wasm, memory)
+    constructor(wasm, importObj)
     {
-        this._wasm = wasm;
-        this._memory = new Uint8Array(memory.buffer);
+        super(wasm, importObj);
     }
 
     decodeA(data)
     {
-        let len = this._doCode(data, this._wasm.instance.exports._decodeG711a, data.byteLength);
-        return new Int16Array(this._memory.buffer, 10240, len);
+        this._copyToMemory(data);
+        this._wasm.instance.exports._decodeG711a(data.byteLength, 0, data.byteLength);
+        return new Int16Array(this._memory.buffer, data.byteLength, data.byteLength);
     }
 
     decodeU(data)
     {
-        let len = this._doCode(data, this._wasm.instance.exports._decodeG711u, data.byteLength);
-        return new Int16Array(this._memory.buffer, 10240, len);
+        this._copyToMemory(data);
+        this._wasm.instance.exports._decodeG711u(data.byteLength, 0, data.byteLength);
+        return new Int16Array(this._memory.buffer, data.byteLength, data.byteLength);
     }
 
     encodeA(data)
     {
-        let len = this._doCode(data, this._wasm.instance.exports._encodeG711a, data.byteLength / 2);
-        return new Uint8Array(this._memory.buffer, 10240, len);
+        this._copyToMemory(data);
+        this._wasm.instance.exports._encodeG711a(data.byteLength, 0, data.byteLength >>> 1);
+        return new Uint8Array(this._memory.buffer, data.byteLength, data.byteLength >>> 1);
     }
 
     encodeU(data)
     {
-        let len = this._doCode(data, this._wasm.instance.exports._encodeG711u, data.byteLength / 2);
-        return new Uint8Array(this._memory.buffer, 10240, len);
-    }
-
-    _doCode(data, len, callback)
-    {
-        this._memory.set(new Uint8Array(data.buffer));
-        return callback(10240, 0, len);
+        this._copyToMemory(data);
+        this._wasm.instance.exports._encodeG711u(data.byteLength, 0, data.byteLength >>> 1);
+        return new Uint8Array(this._memory.buffer, data.byteLength, data.byteLength >>> 1);
     }
 }

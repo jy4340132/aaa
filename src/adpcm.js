@@ -1,11 +1,10 @@
 
 
-class Adpcm
+class Adpcm extends AudioCoder
 {
-    constructor(wasm, memory)
+    constructor(wasm, importObj)
     {
-        this._wasm = wasm;
-        this._memory = new Uint8Array(memory.buffer);
+        super(wasm, importObj);
         this._indexDe = Adpcm._currentIndex;
         this._indexEn = Adpcm._currentIndex + 1;
         Adpcm._currentIndex = (Adpcm._currentIndex + 2) & 0x3F;
@@ -37,16 +36,16 @@ class Adpcm
 
     decode(data)
     {
-        this._memory.set(new Uint8Array(data.buffer, data.byteOffset, data.byteLength));
-        this._wasm.instance.exports._decodeAdpcm(this._indexDe, 0, 10240, data.byteLength * 2);
-        return new Int16Array(this._memory.buffer, 10240, data.byteLength * 2);
+        this._copyToMemory(data);
+        this._wasm.instance.exports._decodeAdpcm(this._indexDe, 0, 10240, data.byteLength << 1);
+        return new Int16Array(this._memory.buffer, 10240, data.byteLength << 1);
     }
 
     encode(data)
     {
-        this._memory.set(new Uint8Array(data.buffer, data.byteOffset, data.byteLength));
-        this._wasm.instance.exports._encodeAdpcm(this._indexEn, 0, 10240, data.byteLength / 2);
-        return new Uint8Array(this._memory.buffer, 10240, data.byteLength / 4);
+        this._copyToMemory(data);
+        this._wasm.instance.exports._encodeAdpcm(this._indexEn, 0, 10240, data.byteLength >>> 1);
+        return new Uint8Array(this._memory.buffer, 10240, data.byteLength >>> 2);
     }
 }
 

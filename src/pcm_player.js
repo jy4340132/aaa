@@ -4,7 +4,7 @@ class PCMPlayer
     constructor(channels, sampleRate)
     {
         this._samples = new Float32Array();
-        this._flushingTime = 500;
+        this._flushingTime = 200;
         this._channels = channels;
         this._sampleRate = sampleRate;
         this._flush = this._flush.bind(this);
@@ -16,12 +16,18 @@ class PCMPlayer
         this._interval = setInterval(this._flush, this._flushingTime);
     }
 
-    stopFlushing() 
+    setVolume(volume)
     {
-        if(this._interval) 
+        this._gainNode.gain.value = volume;
+    }
+
+    close()
+    {
+        if(this._interval)
         {
             clearInterval(this._interval);
         }
+        this._audioCtx.close();
     };
 
     feed(data) 

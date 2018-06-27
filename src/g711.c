@@ -49,7 +49,7 @@ static int ulaw2linear(unsigned char u_val)
 }
 
 
-static unsigned char linear2alaw(int pcm_val)	/* 2's complement (16-bit range) */
+static unsigned char linear2alaw(int pcm_val)
 {
 	int mask = 0;
 	if (pcm_val >= 0) 
@@ -106,56 +106,42 @@ static unsigned char linear2ulaw(int pcm_val)
 	}
 }
 
-int decodeG711a(short* amp, unsigned char* g711a_data, int g711a_bytes)
+void decodeG711a(short* amp, unsigned char* data, int len)
 {
-	int samples = 0;
 	unsigned char code = 0;
 	int sl = 0;
-	for(int i = 0; ; )
+	for(int i = 0; i < len; ++i)
 	{
-		if(i >= g711a_bytes)
-        {
-			break;
-        }
-		code = g711a_data[++i];
+		code = data[i];
 		sl = alaw2linear(code);
-		amp[++samples] = (short)sl;
+		amp[i] = (short)sl;
 	}
-	return samples;
 }
 
-int decodeG711u(short* amp, unsigned char* g711u_data, int g711u_bytes)
+void decodeG711u(short* amp, unsigned char* data, int len)
 {
-	int samples = 0;
 	unsigned char code = 0;
 	int sl = 0;
-	for(int i = 0; ; )
+	for(int i = 0; i < len; ++i)
 	{
-		if(i >= g711u_bytes)
-        {
-			break;
-        }
-		code = g711u_data[++i];
+		code = data[i];
 		sl = ulaw2linear(code);
-		amp[++samples] = (short)sl;
+		amp[i] = (short)sl;
 	}
-	return samples;
 }
 
-int encodeG711a(unsigned char* g711_data, short* amp, int len)
+void encodeG711a(unsigned char* g711_data, short* amp, int len)
 {
     for (int i = 0; i < len; ++i)
 	{
         g711_data[i] = linear2alaw(amp[i]);
     }
-    return len;
 }
 
-int encodeG711u(unsigned char* g711_data, short* amp, int len)
+void encodeG711u(unsigned char* g711_data, short* amp, int len)
 {
-    for (int i = 0; i < len; ++i)
+    for(int i = 0; i < len; ++i)
 	{
         g711_data[i] = linear2ulaw(amp[i]);
     }
-    return len;
 }
